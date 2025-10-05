@@ -69,7 +69,6 @@ export class Website {
 
 
         } catch (error) {
-            console.error('Error al extraer el contenido del sitio web:', error.message);
             throw new Error(`No se pudo acceder a la URL: ${this.url}`);
         }
         

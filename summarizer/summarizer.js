@@ -1,4 +1,4 @@
-import { getOpenAIClient, getLlamaClient } from './clients.js';
+import { getAIClient } from './clients.js';
 import { messagesFor, linkMessagesFor, brochureMessagesFor } from './prompts.js';
 import { Website } from './scraper.js';
 
@@ -8,19 +8,10 @@ import { Website } from './scraper.js';
  * @returns {Object} Objeto con client y modelName
  */
 function getClientAndModel(modelType) {
-    if (modelType === "openai") {
-        return {
-            client: getOpenAIClient(),
-            modelName: "gpt-4o-mini"
-        };
-    } else if (modelType === "llama") {
-        return {
-            client: getLlamaClient(),
-            modelName: "llama3.2"
-        };
-    } else {
-        throw new Error("Modelo no soportado. Use 'openai' o 'llama'.");
-    }
+    const modelName = modelType === "llama" ? "llama3.2" : "gpt-4o-mini";
+    const baseUrl = modelType === "llama" ? "http://localhost:11434/v1" : undefined;
+    const client = getAIClient(baseUrl);
+    return { client, modelName };
 }
 
 /**
@@ -39,12 +30,12 @@ async function processWebsiteWithAI(url, modelType, messageFunction, operationNa
     const { client, modelName } = getClientAndModel(modelType);
 
     try {
-        const response = await client.createChatCompletion({
+        const response = await client.chat.completions.create({
             model: modelName,
             messages: messageFunction(website)
         });
-
-        return response.data.choices[0].message.content;
+        
+        return response.choices[0].message.content;
     } catch (error) {
         console.error(`Error al ${operationName}:`, error.message);
         throw new Error(`Error al ${operationName}: ${error.message}`);
@@ -71,54 +62,100 @@ export async function extractLinks(url, modelType = "openai") {
     return processWebsiteWithAI(url, modelType, linkMessagesFor, "extraer enlaces");
 }
 
-export async function createBrochure(url, companyName, modelType = "openai") {
-    // Crear instancia con scraper automático (similar a __init__ de Python)
-    const website = await Website.create(url);
-
-    // Configurar el cliente según el tipo de modelo
-    const { client, modelName } = getClientAndModel(modelType);
-
-    try {
-        let userPrompt = 'Landing page:\n';
-
-        const site = website;
-        userPrompt += site.getContent();
-
-        const jsonString = await processWebsiteWithAI(url, modelType, linkMessagesFor, "extraer enlaces");
-        
-        // Extraer solo la parte JSON de la respuesta
-        const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-            throw new Error('No se encontró JSON válido en la respuesta de enlaces');
+/**
+ * Procesa enlaces encontrados y agrega su contenido al prompt
+ * @param {Array} links - Array de enlaces encontrados
+ * @param {string} userPrompt - Prompt base
+ * @returns {string} Prompt actualizado con contenido de enlaces
+ */
+async function processLinks(links, userPrompt) {
+    for (const link of links.links) {
+        try {
+            const linkedSite = await Website.create(link.url);
+            userPrompt += `\n\n${link.type}\n`;
+            userPrompt += linkedSite.getContent();
+        } catch (error) {
+            // Silenciosamente continuar si no se puede acceder al enlace
         }
-        
-        const links = JSON.parse(jsonMatch[0]);
-        
-        for (const link of links.links) {
-            try {
-                const linkedSite = await Website.create(link.url);
-                userPrompt += `\n\n${link.type}\n`;
-                userPrompt += linkedSite.getContent();
-            } catch (error) {
-                console.warn(`⚠️  No se pudo procesar ${link.type} (${link.url}): ${error.message}`);
-                // Continuar con el siguiente enlace en lugar de fallar completamente
-                userPrompt += `\n\n${link.type}\n`;
-                userPrompt += `[Error: No se pudo acceder a esta página - ${link.url}]\n`;
-            }
-        }
+    }
+    return userPrompt;
+}
 
-        // Truncar el prompt si es muy largo para evitar errores de tokens
-        const truncatedPrompt = userPrompt.length > 3000 ? userPrompt.slice(0, 3000) + '...' : userPrompt;
-        
-        const response = await client.createChatCompletion({
+/**
+ * Genera el folleto usando streaming para OpenAI o método normal para otros modelos
+ * @param {Object} client - Cliente de IA
+ * @param {string} modelName - Nombre del modelo
+ * @param {string} modelType - Tipo de modelo (openai/llama)
+ * @param {string} companyName - Nombre de la empresa
+ * @param {string} truncatedPrompt - Prompt truncado
+ * @returns {string} Contenido del folleto generado
+ */
+async function generateBrochure(client, modelName, modelType, companyName, truncatedPrompt) {
+    const messages = brochureMessagesFor(companyName, truncatedPrompt);
+    
+    if (modelType === "openai") {
+        // Streaming real para OpenAI
+        const stream = await client.chat.completions.create({
             model: modelName,
-            messages: brochureMessagesFor(companyName, truncatedPrompt)
+            messages: messages,
+            stream: true
         });
 
-        return response.data.choices[0].message.content;
-    } catch (error) {
-        console.error(`Error al crear el folleto:`, error.message);
-        throw new Error(`Error al crear el folleto: ${error.message}`);
+        let result = '';
+        for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content || '';
+            if (content) {
+                result += content;
+                process.stdout.write(content);
+            }
+        }
+        return result;
+    } else {
+        // Método normal para otros modelos
+        const response = await client.chat.completions.create({
+            model: modelName,
+            messages: messages
+        });
+        return response.choices[0].message.content;
     }
 }
 
+export async function createBrochure(url, companyName, modelType = "openai") {
+    console.log(`\n📝 Creando folleto para ${companyName} usando ${modelType}...\n`);
+    
+    // Crear instancia con scraper automático (similar a __init__ de Python)
+    const website = await Website.create(url);
+    const { client, modelName } = getClientAndModel(modelType);
+
+    try {
+        // Construir prompt base con página principal
+        let userPrompt = 'Landing page:\n';
+        userPrompt += website.getContent();
+
+        // Extraer y procesar enlaces relevantes
+        const jsonString = await processWebsiteWithAI(url, modelType, linkMessagesFor, "extraer enlaces");
+        
+        const jsonStart = jsonString.indexOf('{');
+        const jsonEnd = jsonString.lastIndexOf('}');
+        
+        if (jsonStart === -1 || jsonEnd === -1 || jsonEnd <= jsonStart) {
+            throw new Error('No se encontró JSON válido en la respuesta de enlaces');
+        }
+        
+        const jsonStr = jsonString.substring(jsonStart, jsonEnd + 1);
+        const links = JSON.parse(jsonStr);
+
+        // Procesar enlaces y agregar contenido al prompt
+        userPrompt = await processLinks(links, userPrompt);
+
+        // Truncar el prompt si es muy largo para evitar errores de tokens
+        const truncatedPrompt = userPrompt.length > 3000 ? userPrompt.slice(0, 3000) + '...' : userPrompt;
+
+        // Generar folleto usando la función unificada
+        return await generateBrochure(client, modelName, modelType, companyName, truncatedPrompt);
+        
+    } catch (error) {
+        console.error(`\n❌ Error al crear el folleto:`, error.message);
+        throw new Error(`Error al crear el folleto: ${error.message}`);
+    }
+}

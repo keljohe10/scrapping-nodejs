@@ -33,7 +33,7 @@
     "commander": "^9.4.1",
     "dotenv": "^16.0.0",
     "jsdom": "^22.1.0",
-    "openai": "^3.2.1"
+    "openai": "^6.1.0"
   },
   "engines": {
     "node": ">=18.0.0"
