@@ -1,18 +1,7 @@
-import { getAIClient } from './clients.js';
+import { getClientAndModel } from './clients.js';
 import { messagesFor, linkMessagesFor, brochureMessagesFor } from './prompts.js';
 import { Website } from './scraper.js';
 
-/**
- * Configura el cliente y modelo según el tipo especificado
- * @param {string} modelType - Tipo de modelo ('openai' o 'llama')
- * @returns {Object} Objeto con client y modelName
- */
-function getClientAndModel(modelType) {
-    const modelName = modelType === "llama" ? "llama3.2" : "gpt-4o-mini";
-    const baseUrl = modelType === "llama" ? "http://localhost:11434/v1" : undefined;
-    const client = getAIClient(baseUrl);
-    return { client, modelName };
-}
 
 /**
  * Función común para procesar un sitio web con IA

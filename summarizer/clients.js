@@ -7,10 +7,16 @@ dotenv.config();
  * @param {string} baseUrl - URL base para el cliente (opcional)
  * @returns {OpenAI} Cliente de OpenAI configurado
  */
-export function getAIClient(baseUrl) {
+function getAIClient(baseUrl) {
     return new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
         baseURL: baseUrl || undefined
     });
 }
 
+export function getClientAndModel(modelType) {
+    const modelName = modelType === "llama" ? "llama3.2" : "gpt-4o-mini";
+    const baseUrl = modelType === "llama" ? "http://localhost:11434/v1" : undefined;
+    const client = getAIClient(baseUrl);
+    return { client, modelName };
+}
