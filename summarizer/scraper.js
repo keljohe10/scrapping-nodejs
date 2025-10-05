@@ -22,6 +22,19 @@ export class Website {
         this.title = "No title found";
         this.text = "";
         this.links = [];
+        this.scraped = false;
+    }
+
+    /**
+     * Método estático para crear una instancia de Website con scraper automático
+     * Similar al __init__ de Python
+     * @param {string} url - URL del sitio web a analizar
+     * @returns {Promise<Website>} Instancia de Website ya inicializada
+     */
+    static async create(url) {
+        const website = new Website(url);
+        await website.scrape();
+        return website;
     }
 
     /**
@@ -59,5 +72,17 @@ export class Website {
             console.error('Error al extraer el contenido del sitio web:', error.message);
             throw new Error(`No se pudo acceder a la URL: ${this.url}`);
         }
+        
+        this.scraped = true;
+    }
+    /**
+     * Obtiene el contenido del sitio web
+     * @returns {string} Contenido formateado del sitio web
+     */
+    getContent() {
+        if (!this.scraped) {
+            throw new Error('El sitio web no ha sido procesado. Use Website.create() o llame a scrape() primero.');
+        }
+        return `Webpage Title:\n${this.title}\nWebpage Contents:\n${this.text}\n\n`
     }
 }

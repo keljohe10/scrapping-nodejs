@@ -2,19 +2,18 @@
   "name": "web-summarizer-js",
   "version": "1.0.0",
   "description": "A Node.js web summarizer that extracts and summarizes website content using OpenAI API",
-  "main": "main.js",
+  "main": "cli.js",
   "type": "module",
   "scripts": {
-    "start": "node main.js",
-    "dev": "node main.js",
-    "cli": "node cli.js",
     "summary": "node cli.js summary",
     "summary:openai": "node cli.js summary --model openai",
     "summary:llama": "node cli.js summary --model llama",
     "links": "node cli.js links",
     "links:openai": "node cli.js links --model openai",
     "links:llama": "node cli.js links --model llama",
-    "interactive": "node cli.js interactive"
+    "brochure": "node cli.js brochure",
+    "brochure:openai": "node cli.js brochure --model openai",
+    "brochure:llama": "node cli.js brochure --model llama"
   },
   "bin": {
     "web-summarizer": "./cli.js"

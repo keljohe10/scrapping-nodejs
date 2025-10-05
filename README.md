@@ -1,16 +1,17 @@
-# 🕸️ Web Summarizer - JavaScript/Node.js
+# 🕸️ Web Summarizer CLI - JavaScript/Node.js
 
-Este proyecto en JavaScript/Node.js te permite extraer y resumir el contenido de cualquier página web utilizando la API de OpenAI. Ideal para periodistas, analistas, investigadores o cualquier persona que quiera obtener resúmenes rápidos de sitios web.
+Herramienta CLI para extraer y resumir contenido de sitios web utilizando OpenAI o Llama. Ideal para periodistas, analistas, investigadores o cualquier persona que quiera obtener resúmenes rápidos de sitios web.
 
 ---
 
 ## 🚀 Características
 
-- Scraping básico del contenido visible de una página web (sin scripts, estilos ni imágenes).
-- Generación de resumen utilizando `gpt-4o-mini` (o el modelo que prefieras).
-- Soporte para OpenAI y Ollama (Llama).
-- Limpio y modular: fácil de mantener y escalar.
-- Completamente asíncrono con async/await.
+- **Scraping automático** del contenido visible de páginas web
+- **Resúmenes inteligentes** usando OpenAI (gpt-4o-mini) o Llama (llama3.2)
+- **Extracción de enlaces relevantes** (About, Careers, etc.)
+- **Interfaz CLI moderna** con Commander.js
+- **Scraper automático** al instanciar (similar a `__init__` de Python)
+- **Completamente asíncrono** con async/await
 
 ---
 
@@ -22,12 +23,12 @@ web-summarizer-js/
 ├── .gitignore           # Archivos y carpetas excluidos del repositorio
 ├── package.json         # Dependencias y configuración del proyecto
 ├── README.md            # Este archivo
-├── main.js              # Punto de entrada del programa
+├── cli.js               # Interfaz CLI principal
 └── summarizer/          # Lógica del proyecto
-    ├── clients.js       # Clientes de OpenAI y Ollama
+    ├── clients.js       # Clientes de OpenAI y Llama
     ├── scraper.js       # Extracción de contenido web
     ├── prompts.js       # Prompts para la IA
-    └── summarizer.js    # Lógica principal de resumen
+    └── summarizer.js    # Funciones principales
 ```
 
 ---
@@ -57,7 +58,7 @@ npm install
 
 ---
 
-## 🔐 Configura tu clave API
+## 🔐 Configuración
 
 Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
 
@@ -71,9 +72,7 @@ OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ## 🧪 Uso
 
-### Interfaz de Línea de Comandos (CLI)
-
-El proyecto ahora incluye una interfaz CLI completa con Commander.js que te permite ejecutar diferentes acciones:
+### Comandos Principales
 
 #### 1. Resumir un sitio web
 ```bash
@@ -107,49 +106,29 @@ node cli.js links https://anthropic.com
 node cli.js links https://anthropic.com --model openai
 ```
 
-#### 3. Modo interactivo (compatibilidad con versión anterior)
-```bash
-# Usando npm script
-npm run interactive
+### Scripts NPM Disponibles
 
-# O directamente con node
-node cli.js interactive
-```
+| Script | Descripción | Ejemplo |
+|--------|-------------|---------|
+| `npm run summary:openai` | Resumen con OpenAI | `npm run summary:openai https://example.com` |
+| `npm run summary:llama` | Resumen con Llama | `npm run summary:llama https://example.com` |
+| `npm run links:openai` | Enlaces con OpenAI | `npm run links:openai https://example.com` |
+| `npm run links:llama` | Enlaces con Llama | `npm run links:llama https://example.com` |
 
-#### 4. Ver ayuda
+### Ayuda
+
 ```bash
+# Ver ayuda general
 node cli.js --help
+
+# Ver ayuda de comandos específicos
 node cli.js summary --help
 node cli.js links --help
 ```
 
-### Uso tradicional (modo interactivo)
-
-Si prefieres el modo interactivo original:
-
-```bash
-npm start
-```
-
-O directamente con Node.js:
-
-```bash
-node main.js
-```
-
-Ingresa una URL cuando se te solicite, por ejemplo:
-
-```
-Ingresa la URL del sitio web a resumir: https://anthropic.com
-```
-
-Y verás un resumen generado directamente en la terminal 🎯
-
 ---
 
 ## 🤖 Modelos compatibles
-
-Este proyecto soporta:
 
 ### OpenAI
 - `gpt-4o-mini` (por defecto)
@@ -164,33 +143,50 @@ Este proyecto soporta:
 
 ## 🛠️ Dependencias
 
+- **commander**: Interfaz CLI moderna
 - **openai**: Cliente oficial de OpenAI para Node.js
 - **axios**: Cliente HTTP para realizar peticiones web
 - **cheerio**: Parser HTML del lado del servidor (similar a jQuery)
 - **dotenv**: Carga variables de entorno desde archivo .env
-- **readline**: Interfaz para leer input del usuario
 
 ---
 
 ## 🔧 Desarrollo
 
-Para ejecutar en modo desarrollo:
+### Estructura del código
 
-```bash
-npm run dev
+```javascript
+// Crear instancia con scraper automático (similar a __init__ de Python)
+const website = await Website.create('https://example.com');
+
+// Generar resumen
+const summary = await summarize('https://example.com', 'openai');
+
+// Extraer enlaces
+const links = await extractLinks('https://example.com', 'llama');
 ```
 
----
+### Características técnicas
 
-## 📝 Diferencias con la versión Python
-
-- **Asíncrono**: Todo el código utiliza async/await para operaciones asíncronas
 - **ES Modules**: Utiliza la sintaxis moderna de import/export
+- **Asíncrono**: Todo el código utiliza async/await
+- **Scraper automático**: Se ejecuta al instanciar la clase Website
 - **Manejo de errores**: Mejor manejo de errores con try/catch
-- **TypeScript ready**: Fácil de migrar a TypeScript si es necesario
 
 ---
 
 ## 📝 Licencia
 
 MIT License
+
+---
+
+## 🤝 Contribuciones
+
+Las contribuciones son bienvenidas. Por favor, abre un issue o pull request si tienes alguna mejora.
+
+---
+
+## 📞 Soporte
+
+Si tienes problemas o preguntas, por favor abre un issue en el repositorio.

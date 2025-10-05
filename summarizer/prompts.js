@@ -1,3 +1,4 @@
+import { Website } from "./scraper.js";
 /**
  * Genera el prompt del sistema para el resumen
  * @returns {string} Prompt del sistema
@@ -53,6 +54,29 @@ Do not include Terms of Service, Privacy, email links.\n" +
     );
 }
 
+const detailSystemPrompt = () => {
+    return (
+        `You are an assistant that analyzes the contents of several relevant pages from a company website \
+and creates a short brochure about the company for prospective customers, investors and recruits. Respond in markdown.\
+Include details of company culture, customers and careers/jobs if you have the information.`
+    );
+}
+
+function getBrochureUserPrompt(companyName, details) {
+    let userPrompt = `You are looking at a company called: ${companyName}\n`;
+    userPrompt +=
+        'Here are the contents of its landing page and other relevant pages; use this information to build a short brochure of the company in markdown.\n';
+
+    userPrompt += details;
+
+    // Truncate if longer than 5000 characters
+    if (userPrompt.length > 5000) {
+        userPrompt = userPrompt.slice(0, 5000);
+    }
+
+    return userPrompt;
+}
+
 /**
  * Genera los mensajes para la API de OpenAI
  * @param {Website} website - Objeto Website con el contenido extraído
@@ -69,5 +93,12 @@ export const linkMessagesFor = (website) => {
     return [
         { role: "system", content: linkSystemPrompt() },
         { role: "user", content: linkUserPrompt(website) }
+    ];
+}
+
+export const brochureMessagesFor = (companyName, details) => {
+    return [
+        { role: "system", content: detailSystemPrompt() },
+        { role: "user", content: getBrochureUserPrompt(companyName, details) }
     ];
 }
