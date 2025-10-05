@@ -12,6 +12,48 @@ Herramienta CLI para extraer y resumir contenido de sitios web utilizando OpenAI
 - **Interfaz CLI moderna** con Commander.js
 - **Scraper automático** al instanciar (similar a `__init__` de Python)
 - **Completamente asíncrono** con async/await
+- **Streaming real** para OpenAI (contenido en tiempo real)
+- **Código de calidad** con ESLint y Prettier
+
+---
+
+## 🛠️ Herramientas de Desarrollo
+
+### ESLint
+
+Configurado con estándares de calidad de código para Node.js:
+
+```bash
+npm run lint          # Verificar errores de código
+npm run lint:fix      # Corregir errores automáticamente
+npm run lint:check    # Verificar sin warnings
+```
+
+### Prettier
+
+Formateador de código para mantener consistencia:
+
+```bash
+npm run format        # Formatear todo el código
+npm run format:check  # Verificar formato
+npm run format:lint   # Formatear y lint en una sola ejecución
+```
+
+### Scripts Disponibles
+
+```bash
+# Comandos principales
+npm run summary:openai <url>     # Resumen con OpenAI
+npm run summary:llama <url>      # Resumen con Llama
+npm run links:openai <url>       # Extraer enlaces con OpenAI
+npm run links:llama <url>        # Extraer enlaces con Llama
+npm run brochure:openai <url> <company>  # Folleto con OpenAI
+npm run brochure:llama <url> <company>   # Folleto con Llama
+
+# Herramientas de desarrollo
+npm run lint                      # Verificar código
+npm run format                    # Formatear código
+```
 
 ---
 
@@ -75,6 +117,7 @@ OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ### Comandos Principales
 
 #### 1. Resumir un sitio web
+
 ```bash
 # Usando npm scripts específicos por modelo
 npm run summary:openai https://anthropic.com
@@ -91,6 +134,7 @@ node cli.js summary https://anthropic.com --model llama
 ```
 
 #### 2. Extraer enlaces relevantes
+
 ```bash
 # Usando npm scripts específicos por modelo
 npm run links:openai https://anthropic.com
@@ -108,12 +152,12 @@ node cli.js links https://anthropic.com --model openai
 
 ### Scripts NPM Disponibles
 
-| Script | Descripción | Ejemplo |
-|--------|-------------|---------|
+| Script                   | Descripción        | Ejemplo                                      |
+| ------------------------ | ------------------ | -------------------------------------------- |
 | `npm run summary:openai` | Resumen con OpenAI | `npm run summary:openai https://example.com` |
-| `npm run summary:llama` | Resumen con Llama | `npm run summary:llama https://example.com` |
-| `npm run links:openai` | Enlaces con OpenAI | `npm run links:openai https://example.com` |
-| `npm run links:llama` | Enlaces con Llama | `npm run links:llama https://example.com` |
+| `npm run summary:llama`  | Resumen con Llama  | `npm run summary:llama https://example.com`  |
+| `npm run links:openai`   | Enlaces con OpenAI | `npm run links:openai https://example.com`   |
+| `npm run links:llama`    | Enlaces con Llama  | `npm run links:llama https://example.com`    |
 
 ### Ayuda
 
@@ -131,11 +175,13 @@ node cli.js links --help
 ## 🤖 Modelos compatibles
 
 ### OpenAI
+
 - `gpt-4o-mini` (por defecto)
 - `gpt-3.5-turbo`
 - Cualquier modelo disponible en tu cuenta de OpenAI
 
 ### Ollama (Llama)
+
 - `llama3.2` (por defecto)
 - Cualquier modelo de Llama disponible en tu instalación de Ollama
 

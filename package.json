@@ -1,41 +1,55 @@
 {
-  "name": "web-summarizer-js",
-  "version": "1.0.0",
-  "description": "A Node.js web summarizer that extracts and summarizes website content using OpenAI API",
-  "main": "cli.js",
-  "type": "module",
-  "scripts": {
-    "summary": "node cli.js summary",
-    "summary:openai": "node cli.js summary --model openai",
-    "summary:llama": "node cli.js summary --model llama",
-    "links": "node cli.js links",
-    "links:openai": "node cli.js links --model openai",
-    "links:llama": "node cli.js links --model llama",
-    "brochure": "node cli.js brochure",
-    "brochure:openai": "node cli.js brochure --model openai",
-    "brochure:llama": "node cli.js brochure --model llama"
-  },
-  "bin": {
-    "web-summarizer": "./cli.js"
-  },
-  "keywords": [
-    "web-scraping",
-    "summarizer",
-    "openai",
-    "nodejs",
-    "javascript"
-  ],
-  "author": "keljohe10",
-  "license": "MIT",
-  "dependencies": {
-    "axios": "^1.5.0",
-    "cheerio": "^1.0.0-rc.12",
-    "commander": "^9.4.1",
-    "dotenv": "^16.0.0",
-    "jsdom": "^22.1.0",
-    "openai": "^6.1.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
+    "name": "web-summarizer-js",
+    "version": "1.0.0",
+    "description": "A Node.js web summarizer that extracts and summarizes website content using OpenAI API",
+    "main": "cli.js",
+    "type": "module",
+    "scripts": {
+        "summary": "node cli.js summary",
+        "summary:openai": "node cli.js summary --model openai",
+        "summary:llama": "node cli.js summary --model llama",
+        "links": "node cli.js links",
+        "links:openai": "node cli.js links --model openai",
+        "links:llama": "node cli.js links --model llama",
+        "brochure": "node cli.js brochure",
+        "brochure:openai": "node cli.js brochure --model openai",
+        "brochure:llama": "node cli.js brochure --model llama",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "lint:check": "eslint . --max-warnings 0",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "format:lint": "npm run format && npm run lint:fix"
+    },
+    "bin": {
+        "web-summarizer": "./cli.js"
+    },
+    "keywords": [
+        "web-scraping",
+        "summarizer",
+        "openai",
+        "nodejs",
+        "javascript"
+    ],
+    "author": "keljohe10",
+    "license": "MIT",
+    "dependencies": {
+        "axios": "^1.5.0",
+        "cheerio": "^1.0.0-rc.12",
+        "commander": "^9.4.1",
+        "dotenv": "^16.0.0",
+        "jsdom": "^22.1.0",
+        "openai": "^6.1.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "devDependencies": {
+        "eslint": "^8.57.1",
+        "eslint-config-standard": "^17.1.0",
+        "eslint-plugin-import": "^2.32.0",
+        "eslint-plugin-n": "^16.6.2",
+        "eslint-plugin-promise": "^6.6.0",
+        "prettier": "^3.6.2"
+    }
 }

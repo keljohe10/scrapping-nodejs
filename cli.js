@@ -21,12 +21,12 @@ program
             console.log(`URL: ${url}`);
             console.log(`Modelo: ${options.model}`);
             console.log('-'.repeat(60));
-            
+
             const result = await summarize(url, options.model);
             console.log(result);
         } catch (error) {
             console.error('Error:', error.message);
-            process.exit(1);
+            throw error;
         }
     });
 
@@ -42,18 +42,20 @@ program
             console.log(`URL: ${url}`);
             console.log(`Modelo: ${options.model}`);
             console.log('-'.repeat(60));
-            
+
             const result = await extractLinks(url, options.model);
             console.log(result);
         } catch (error) {
             console.error('Error:', error.message);
-            process.exit(1);
+            throw error;
         }
     });
 
 program
     .command('brochure')
-    .description('Crea un folleto corto sobre la empresa basado en su sitio web y páginas relevantes')
+    .description(
+        'Crea un folleto corto sobre la empresa basado en su sitio web y páginas relevantes'
+    )
     .argument('<url>', 'URL del sitio web de la empresa')
     .argument('<companyName>', 'Nombre de la empresa')
     .option('-m, --model <type>', 'Modelo a usar (openai o llama)', 'openai')
@@ -69,7 +71,7 @@ program
             console.log(result);
         } catch (error) {
             console.error('Error:', error.message);
-            process.exit(1);
+            throw error;
         }
     });
 

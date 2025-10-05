@@ -2,11 +2,10 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 
 const HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-        "AppleWebKit/537.36 (KHTML, like Gecko) " +
-        "Chrome/117.0.0.0 Safari/537.36"
-    )
+    'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+        'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+        'Chrome/117.0.0.0 Safari/537.36'
 };
 
 /**
@@ -19,8 +18,8 @@ export class Website {
      */
     constructor(url) {
         this.url = url;
-        this.title = "No title found";
-        this.text = "";
+        this.title = 'No title found';
+        this.text = '';
         this.links = [];
         this.scraped = false;
     }
@@ -47,18 +46,13 @@ export class Website {
             this.body = response.data;
             const $ = cheerio.load(this.body);
 
-
-            // Extract title
             this.title = $('title').text() || 'No title found';
-
 
             // Clean up unwanted elements
             $('script, style, img, input').remove();
 
-
             // Extract visible text
             this.text = $('body').text().replace(/\s+/g, ' ').trim();
-
 
             // Extract links
             this.links = [];
@@ -66,22 +60,23 @@ export class Website {
                 const href = $(el).attr('href');
                 if (href) this.links.push(href);
             });
-
-
         } catch (error) {
             throw new Error(`No se pudo acceder a la URL: ${this.url}`);
         }
-        
+
         this.scraped = true;
     }
+
     /**
      * Obtiene el contenido del sitio web
      * @returns {string} Contenido formateado del sitio web
      */
     getContent() {
         if (!this.scraped) {
-            throw new Error('El sitio web no ha sido procesado. Use Website.create() o llame a scrape() primero.');
+            throw new Error(
+                'El sitio web no ha sido procesado. Use Website.create() o llame a scrape() primero.'
+            );
         }
-        return `Webpage Title:\n${this.title}\nWebpage Contents:\n${this.text}\n\n`
+        return `Webpage Title:\n${this.title}\nWebpage Contents:\n${this.text}\n\n`;
     }
 }

@@ -1,7 +1,6 @@
-import { getClientAndModel } from './clients.js';
+import { getClientAndModel } from '../client/clients.js';
 import { messagesFor, linkMessagesFor, brochureMessagesFor } from './prompts.js';
 import { Website } from './scraper.js';
-
 
 /**
  * Función común para procesar un sitio web con IA
@@ -23,7 +22,7 @@ async function processWebsiteWithAI(url, modelType, messageFunction, operationNa
             model: modelName,
             messages: messageFunction(website)
         });
-        
+
         return response.choices[0].message.content;
     } catch (error) {
         console.error(`Error al ${operationName}:`, error.message);
@@ -37,8 +36,8 @@ async function processWebsiteWithAI(url, modelType, messageFunction, operationNa
  * @param {string} modelType - Tipo de modelo a usar ('openai' o 'llama')
  * @returns {Promise<string>} Resumen del contenido del sitio web
  */
-export async function summarize(url, modelType = "openai") {
-    return processWebsiteWithAI(url, modelType, messagesFor, "generar el resumen");
+export async function summarize(url, modelType = 'openai') {
+    return processWebsiteWithAI(url, modelType, messagesFor, 'generar el resumen');
 }
 
 /**
@@ -47,8 +46,8 @@ export async function summarize(url, modelType = "openai") {
  * @param {string} modelType - Tipo de modelo a usar ('openai' o 'llama')
  * @returns {Promise<string>} Enlaces relevantes del sitio web
  */
-export async function extractLinks(url, modelType = "openai") {
-    return processWebsiteWithAI(url, modelType, linkMessagesFor, "extraer enlaces");
+export async function extractLinks(url, modelType = 'openai') {
+    return processWebsiteWithAI(url, modelType, linkMessagesFor, 'extraer enlaces');
 }
 
 /**
@@ -58,16 +57,17 @@ export async function extractLinks(url, modelType = "openai") {
  * @returns {string} Prompt actualizado con contenido de enlaces
  */
 async function processLinks(links, userPrompt) {
+    let updatedPrompt = userPrompt;
     for (const link of links.links) {
         try {
             const linkedSite = await Website.create(link.url);
-            userPrompt += `\n\n${link.type}\n`;
-            userPrompt += linkedSite.getContent();
+            updatedPrompt += `\n\n${link.type}\n`;
+            updatedPrompt += linkedSite.getContent();
         } catch (error) {
             // Silenciosamente continuar si no se puede acceder al enlace
         }
     }
-    return userPrompt;
+    return updatedPrompt;
 }
 
 /**
@@ -81,12 +81,12 @@ async function processLinks(links, userPrompt) {
  */
 async function generateBrochure(client, modelName, modelType, companyName, truncatedPrompt) {
     const messages = brochureMessagesFor(companyName, truncatedPrompt);
-    
-    if (modelType === "openai") {
+
+    if (modelType === 'openai') {
         // Streaming real para OpenAI
         const stream = await client.chat.completions.create({
             model: modelName,
-            messages: messages,
+            messages,
             stream: true
         });
 
@@ -103,48 +103,46 @@ async function generateBrochure(client, modelName, modelType, companyName, trunc
         // Método normal para otros modelos
         const response = await client.chat.completions.create({
             model: modelName,
-            messages: messages
+            messages
         });
         return response.choices[0].message.content;
     }
 }
 
-export async function createBrochure(url, companyName, modelType = "openai") {
+export async function createBrochure(url, companyName, modelType = 'openai') {
     console.log(`\n📝 Creando folleto para ${companyName} usando ${modelType}...\n`);
-    
-    // Crear instancia con scraper automático (similar a __init__ de Python)
     const website = await Website.create(url);
     const { client, modelName } = getClientAndModel(modelType);
 
     try {
-        // Construir prompt base con página principal
         let userPrompt = 'Landing page:\n';
         userPrompt += website.getContent();
 
-        // Extraer y procesar enlaces relevantes
-        const jsonString = await processWebsiteWithAI(url, modelType, linkMessagesFor, "extraer enlaces");
-        
+        const jsonString = await processWebsiteWithAI(
+            url,
+            modelType,
+            linkMessagesFor,
+            'extraer enlaces'
+        );
+
         const jsonStart = jsonString.indexOf('{');
         const jsonEnd = jsonString.lastIndexOf('}');
-        
+
         if (jsonStart === -1 || jsonEnd === -1 || jsonEnd <= jsonStart) {
             throw new Error('No se encontró JSON válido en la respuesta de enlaces');
         }
-        
+
         const jsonStr = jsonString.substring(jsonStart, jsonEnd + 1);
         const links = JSON.parse(jsonStr);
 
-        // Procesar enlaces y agregar contenido al prompt
         userPrompt = await processLinks(links, userPrompt);
 
-        // Truncar el prompt si es muy largo para evitar errores de tokens
-        const truncatedPrompt = userPrompt.length > 3000 ? userPrompt.slice(0, 3000) + '...' : userPrompt;
+        const truncatedPrompt =
+            userPrompt.length > 3000 ? `${userPrompt.slice(0, 3000)}...` : userPrompt;
 
-        // Generar folleto usando la función unificada
         return await generateBrochure(client, modelName, modelType, companyName, truncatedPrompt);
-        
     } catch (error) {
-        console.error(`\n❌ Error al crear el folleto:`, error.message);
+        console.error('\n❌ Error al crear el folleto:', error.message);
         throw new Error(`Error al crear el folleto: ${error.message}`);
     }
 }
