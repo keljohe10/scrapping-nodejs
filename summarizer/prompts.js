@@ -1,3 +1,4 @@
+import { brochureExamples } from '../seed/brochure.js';
 /**
  * Genera el prompt del sistema para el resumen
  * @returns {string} Prompt del sistema
@@ -50,13 +51,7 @@ const linkUserPrompt = website => {
     );
 };
 
-const detailSystemPrompt = () => {
-    return (
-        'You are an assistant that analyzes the contents of several relevant pages from a company website ' +
-        'and creates a short brochure about the company for prospective customers, investors and recruits. Respond in markdown. ' +
-        'Include details of company culture, customers and careers/jobs if you have the information.'
-    );
-};
+// detailSystemPrompt removido - ahora se usa multi-shot prompting en brochureMessagesFor
 
 function getBrochureUserPrompt(companyName, details) {
     let userPrompt = `You are looking at a company called: ${companyName}\n`;
@@ -93,8 +88,39 @@ export const linkMessagesFor = website => {
 };
 
 export const brochureMessagesFor = (companyName, details) => {
-    return [
-        { role: 'system', content: detailSystemPrompt() },
-        { role: 'user', content: getBrochureUserPrompt(companyName, details) }
+    const systemPrompt = `You are an expert at creating professional company brochures. You will be given examples of well-structured brochures and then asked to create one for a specific company.
+
+IMPORTANT: Follow the exact structure and style of the examples provided. Each brochure should include:
+1. Company name as main heading
+2. About section with company overview
+3. Company Culture section with values/mission
+4. Our Customers section describing target audience
+5. Careers section with job opportunities and benefits
+6. Get in Touch section with contact information
+
+Use professional, engaging language and maintain consistency in formatting.`;
+
+    const messages = [
+        { role: 'system', content: systemPrompt }
     ];
+
+    // Add examples for multi-shot prompting
+    brochureExamples.forEach(example => {
+        messages.push({
+            role: 'user',
+            content: `Create a professional brochure for ${example.company} based on this information:\n\n${example.content}`
+        });
+        messages.push({
+            role: 'assistant',
+            content: example.expectedOutput
+        });
+    });
+
+    // Add the actual request
+    messages.push({
+        role: 'user',
+        content: getBrochureUserPrompt(companyName, details)
+    });
+
+    return messages;
 };

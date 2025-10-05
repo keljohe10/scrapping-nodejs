@@ -13,6 +13,7 @@ Herramienta CLI para extraer y resumir contenido de sitios web utilizando OpenAI
 - **Scraper automático** al instanciar (similar a `__init__` de Python)
 - **Completamente asíncrono** con async/await
 - **Streaming real** para OpenAI (contenido en tiempo real)
+- **Multi-shot prompting** para brochures de alta calidad
 - **Código de calidad** con ESLint y Prettier
 
 ---
@@ -54,6 +55,31 @@ npm run brochure:llama <url> <company>   # Folleto con Llama
 npm run lint                      # Verificar código
 npm run format                    # Formatear código
 ```
+
+---
+
+## 🎯 Multi-Shot Prompting para Brochures
+
+El comando `brochure` utiliza **multi-shot prompting** para generar brochures de alta calidad. Esto significa que el modelo recibe ejemplos de brochures bien estructurados antes de generar el brochure solicitado.
+
+### Características del Multi-Shot Prompting:
+
+- **3 ejemplos de brochures** de diferentes industrias (Tech, Green Energy, Data Analytics)
+- **Estructura consistente** con secciones estándar:
+  - About (Descripción de la empresa)
+  - Company Culture (Cultura y valores)
+  - Our Customers (Clientes objetivo)
+  - Careers (Oportunidades laborales)
+  - Get in Touch (Información de contacto)
+- **Formato profesional** con markdown y bullet points
+- **Lenguaje persuasivo** y orientado a resultados
+
+### Beneficios:
+
+✅ **Calidad consistente**: Todos los brochures siguen el mismo formato profesional
+✅ **Mejor estructura**: Secciones organizadas y fáciles de leer
+✅ **Lenguaje persuasivo**: Contenido orientado a atraer clientes y talento
+✅ **Adaptabilidad**: Funciona con cualquier tipo de empresa o industria
 
 ---
 
